@@ -1,14 +1,29 @@
+using EcommerceMicroservices.Ai.IntegrationEvents;
+using EcommerceMicroservices.Ai.Mcp;
+using EcommerceMicroservices.AI.Configuration;
+using MediatR;
+using Microsoft.Extensions.AI;
+using Microsoft.SemanticKernel;
+using OpenAI;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
-using Microsoft.Extensions.AI;
-using OpenAI;
-using MediatR;
-using Microsoft.SemanticKernel;
-using EcommerceMicroservices.Ai.Mcp;
-using EcommerceMicroservices.Ai.IntegrationEvents;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ServiceEndpoints>(
+    builder.Configuration.GetSection("Services"));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("LocalDevCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Trust your React frontend origin
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // Crucial to allow passing the secure authentication cookie
+    });
+});
 
 builder.Services.AddSwaggerGen();
 var openAiConfig = builder.Configuration.GetSection("OpenAI");
@@ -46,7 +61,10 @@ builder.Services.AddTransient(sp =>
     var kernelBuilder = Kernel.CreateBuilder();
 
     // Wire up Chat Completion Engine
-    kernelBuilder.AddOpenAIChatCompletion("gpt-4o", builder.Configuration["OpenAi:ApiKey"] ?? "mock-key");
+    kernelBuilder.AddOpenAIChatCompletion(
+    "gpt-4o",
+    apiKey);
+    //kernelBuilder.AddOpenAIChatCompletion("gpt-4o", builder.Configuration["OpenAI:ApiKey"] ?? "mock-key");
 #pragma warning disable SKEXP0010
     // Modern approach: Registers the standardized IEmbeddingGenerator model
     kernelBuilder.AddOpenAIEmbeddingGenerator("text-embedding-3-small", builder.Configuration["OpenAi:ApiKey"] ?? "mock-key");
@@ -89,6 +107,8 @@ catch (Exception ex)
     Console.WriteLine($"Critical Error initializing Qdrant: {ex.Message}");
     throw;
 }
+app.UseCors("LocalDevCorsPolicy");
+
 if (app.Environment.IsDevelopment())
 {
     // app.MapOpenApi();

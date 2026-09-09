@@ -26,8 +26,38 @@ public class ChatAssistantController : ControllerBase
         _kernel.Plugins.AddFromObject(mcpPlugin, "ECommerceMcpTools");
         _chatService = _kernel.GetRequiredService<IChatCompletionService>();
     }
-
     [HttpPost("chat")]
+    public async Task<IActionResult> ExecuteQuerySession(
+    [FromBody] string userMessage)
+    {
+        var chatHistory = new ChatHistory(
+            "You are an advanced platform co-pilot. " +
+            "You have access to product search, product information, " +
+            "inventory, and order management through MCP tools. " +
+            "Use the appropriate tool when necessary to answer the user's request."
+        );
+
+        chatHistory.AddUserMessage(userMessage);
+
+        OpenAIPromptExecutionSettings settings = new()
+        {
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+        };
+
+        var responseContent =
+            await _chatService.GetChatMessageContentAsync(
+                chatHistory,
+                settings,
+                _kernel);
+
+        return Ok(new
+        {
+            Output = responseContent.Content,
+            Mode = "Agent_McpToolExecuting"
+        });
+    }
+
+    /*[HttpPost("chat")]
     public async Task<IActionResult> ExecuteQuerySession([FromBody] string userMessage)
     {
         // Intercept intent triggers to decide between direct RAG search or Agentic tool execution
@@ -42,7 +72,7 @@ public class ChatAssistantController : ControllerBase
         When a user asks you to 'fulfill', 'process', or 'sync inventory' for an order:
         1. Call 'GetOrderStatusAsync' to find out which items and quantities are inside that order.
         2. Immediately look at the returned items, and call 'DeductProductQuantityAsync' sequentially for EACH item found.
-        3. Summarize the final action status to the user once all steps are complete.";*/
+        3. Summarize the final action status to the user once all steps are complete.";//
         var chatHistory = new ChatHistory("You are an advanced platform co-pilot. You have deep access to core database endpoints via MCP Tools.");
         chatHistory.AddUserMessage(userMessage);
 
@@ -53,5 +83,5 @@ public class ChatAssistantController : ControllerBase
 
         var responseContent = await _chatService.GetChatMessageContentAsync(chatHistory, settings, _kernel);
         return Ok(new { Output = responseContent.Content, Mode = "Agent_McpToolExecuting" });
-    }
+    }*/
 }

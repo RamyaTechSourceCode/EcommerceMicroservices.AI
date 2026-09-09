@@ -1,4 +1,6 @@
+using CatalogService.Application.GetCatalogById;
 using CatalogService.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +11,12 @@ namespace CatalogService.Api.Controllers
     public class CatalogController : ControllerBase
     {
         private readonly CatalogDbContext _db;
+        private readonly IMediator _mediator;
 
-        public CatalogController(CatalogDbContext db)
+        public CatalogController(IMediator mediator,CatalogDbContext db)
         {
             _db = db;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -53,6 +57,20 @@ namespace CatalogService.Api.Controllers
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 Data = inventory
             });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            Console.WriteLine(Request.Headers.Authorization);
+
+            var product = await _mediator.Send(
+                new GetCatalogByIdQuery(id));
+
+            if (product is null)
+                return NotFound();
+
+            return Ok(product);
         }
     }
 }
