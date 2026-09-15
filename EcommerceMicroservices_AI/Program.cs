@@ -1,6 +1,9 @@
+﻿using Amazon.BedrockRuntime;
 using EcommerceMicroservices.Ai.IntegrationEvents;
 using EcommerceMicroservices.Ai.Mcp;
+using EcommerceMicroservices.AI.Bedrock;
 using EcommerceMicroservices.AI.Configuration;
+using EcommerceMicroservices.AI.Services;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
@@ -10,9 +13,6 @@ using Qdrant.Client.Grpc;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.Configure<ServiceEndpoints>(
-    builder.Configuration.GetSection("Services"));
 
 builder.Services.AddCors(options =>
 {
@@ -26,6 +26,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<ServiceEndpoints>(
+    builder.Configuration.GetSection("Services"));
+
 var openAiConfig = builder.Configuration.GetSection("OpenAI");
 var apiKey = openAiConfig["ApiKey"];
 
@@ -74,6 +78,7 @@ builder.Services.AddTransient(sp =>
 
 
 // 5. Register MCP Plugins & Background Event Loops
+builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<ECommerceMcpToolsPlugin>();
 builder.Services.AddHostedService<ProductUpdatedConsumer>();
 
