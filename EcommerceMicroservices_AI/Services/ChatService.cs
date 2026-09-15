@@ -3,57 +3,93 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
-namespace EcommerceMicroservices.AI.Services
+namespace EcommerceMicroservices.AI.Services;
+
+public class ChatService
 {
-    public class ChatService
+    private readonly Kernel _kernel;
+    private readonly IChatCompletionService _chatService;
+
+    public ChatService(
+        Kernel kernel,
+        ECommerceMcpToolsPlugin mcpPlugin)
     {
-        private readonly Kernel _kernel;
-        private readonly IChatCompletionService _chatService;
+        _kernel = kernel;
 
-        public ChatService(Kernel kernel, ECommerceMcpToolsPlugin mcpPlugin)
+        // Register ecommerce tools with Semantic Kernel
+        _kernel.Plugins.AddFromObject(
+            mcpPlugin,
+            "ECommerceTools");
+
+        _chatService =
+            _kernel.GetRequiredService<IChatCompletionService>();
+    }
+
+    public async Task<string?> ChatAsync(
+        string userMessage,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(userMessage))
         {
-            _kernel = kernel;
-          
-            _kernel.Plugins.AddFromObject(
-                mcpPlugin,
-                "ECommerceTools");
-            _chatService = kernel.GetRequiredService<IChatCompletionService>();
+            return "Please provide a question.";
         }
 
-        public async Task<string?> ChatAsync(string userMessage)
+        var chatHistory = new ChatHistory();
+
+        chatHistory.AddSystemMessage(
+            """
+            You are an advanced ecommerce platform AI assistant.
+
+            You have access to ecommerce functions for:
+            - Product information
+            - Product search
+            - Inventory availability
+            - Order status
+            - Product catalog recommendations
+
+            IMPORTANT TOOL RULES:
+
+            1. If the user provides a specific product ID and asks
+               about that product, use the product information function.
+
+            2. If the user asks whether a product is in stock,
+               available, or asks about inventory, use the inventory
+               function.
+
+            3. If the user asks about an order, shipping status,
+               packaging, tracking, or order status, use the order
+               function.
+
+            4. If the user asks for product recommendations,
+               similar products, or products suitable for a need,
+               use the product catalog search/recommendation function.
+
+            5. Use functions for live ecommerce information.
+               Do not invent product, inventory, or order information.
+
+            6. Do not claim that you searched the product catalog
+               unless you actually called the appropriate function.
+
+            After receiving function results, explain the answer
+            clearly and concisely to the user.
+            """
+        );
+
+        chatHistory.AddUserMessage(userMessage);
+
+        var settings = new OpenAIPromptExecutionSettings
         {
-            var chatHistory = new ChatHistory(
-                "You are an advanced ecommerce platform co-pilot. " +
-            "You have access to product search, product information, inventory, " +
-            "and order management tools. " +
+            FunctionChoiceBehavior =
+                FunctionChoiceBehavior.Auto()
+        };
 
-            "When the user provides a specific product ID and asks to find, " +
-            "get, show, or retrieve the product, you MUST call GetProductAsync. " +
+        var response =
+            await _chatService.GetChatMessageContentAsync(
+                chatHistory,
+                settings,
+                _kernel,
+                cancellationToken);
 
-            "When the user asks whether a product is in stock, " +
-            "you MUST call CheckCatalogAsync. " +
-
-            "When the user asks about an order status, " +
-            "you MUST call GetOrderStatusAsync. " +
-
-            "Use tools to retrieve live ecommerce data instead of guessing."
-            );
-
-            chatHistory.AddUserMessage(userMessage);
-
-            var settings = new OpenAIPromptExecutionSettings
-            {
-                FunctionChoiceBehavior =
-                    FunctionChoiceBehavior.Auto()
-            };
-
-            var response =
-                await _chatService.GetChatMessageContentAsync(
-                    chatHistory,
-                    settings,
-                    _kernel);
-
-            return response.Content;
-        }
+        return response.Content;
     }
 }

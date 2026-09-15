@@ -1,4 +1,5 @@
 ﻿
+using EcommerceMicroservices.Ai.Features.CatalogRecommendations;
 using EcommerceMicroservices.AI.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -80,26 +81,26 @@ public class ECommerceMcpToolsPlugin
     }
 
     [KernelFunction]
-    public async Task<string> SearchProductsAsync([Description(
-    "Search the product catalog using natural language. " +
-    "Use this when the user is looking for a product, " +
-    "recommendation, or product matching specific requirements."
-    )]string searchTerm)
+    [Description(
+     "Searches the product catalog using semantic search. " +
+     "Use this when the user asks for product recommendations, " +
+     "similar products, products matching a description, or asks " +
+     "which products are suitable for a particular need."
+     )]
+    public async Task<string> SearchProductCatalogAsync(
+     [Description("The user's product search or recommendation request.")]
+    string searchTerm)
     {
 
-        /* var result = await _mediator.Send(
+         var result = await _mediator.Send(
              new GetProductRecommendationsQuery(searchTerm));
 
          return JsonSerializer.Serialize(new
          {
              Products = result.Products,
              Summary = result.AiSummary
-         });*/
-        return JsonSerializer.Serialize(new
-        {
-            Products = 12312414,
-            Summary = "ccdrgegreg"
-        });
+         });
+       
     }
     // [McpServerTool]
     /* public async Task<string> GetProductAsync([Description(
@@ -164,7 +165,7 @@ public class ECommerceMcpToolsPlugin
                 client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(authHeader.ToString());
             }
             var url =
-                $"{_services.InventoryService}/api/catalogs/{productId}";
+                $"{_services.CatalogService}/api/catalogs/{productId}";
 
             var response = await client.GetAsync(url);
 

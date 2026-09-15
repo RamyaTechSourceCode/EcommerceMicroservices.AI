@@ -17,29 +17,29 @@ namespace EcommerceMicroservices.AI.Controllers;
 public class ChatAssistantOpenAIController : ControllerBase
 {
    
-    private readonly ChatService _aiChatService;
+    private readonly ChatService _chatService;
 
     public ChatAssistantOpenAIController(
-        ChatService aiChatService)
+        ChatService chatService)
     {
-        _aiChatService = aiChatService;
+        _chatService = chatService;
     }
 
     [HttpPost("chat")]
-    public async Task<IActionResult> Chat(
-        [FromBody] ChatRequest request)
+    public async Task<IActionResult> ExecuteQuerySession(
+     [FromBody] ChatRequest request,
+     CancellationToken cancellationToken)
     {
-        var result =
-            await _aiChatService.ChatAsync(
-                request.UserMessage);
+        var response = await _chatService.ChatAsync(
+            request.UserMessage,
+            cancellationToken);
 
         return Ok(new
         {
-            Output = result,
-            Mode = "Agent_ToolExecuting"
+            response
         });
     }
- }
+}
     //Kernel in case of multiple tools/plugins, we can intercept the intent triggers to decide between direct RAG search or Agentic tool execution
     /*[HttpPost("chat")]
     public async Task<IActionResult> ExecuteQuerySession([FromBody] string userMessage)

@@ -32,7 +32,10 @@ namespace CatalogService.Application.GetCatalogById
                 ProductId = x.ProductId,
                 Name = x.Name,
                 Price = x.Price,
-                Description = x.Description
+                Description = x.Description,
+                AvailableStock =x.AvailableStock,
+                Status = x.Status,
+                Category = x.Category
             })
             .FirstOrDefaultAsync(cancellationToken);
         }

@@ -49,7 +49,11 @@ public class ProductUpdatedConsumer : BackgroundService
 
                     var point = new PointStruct
                     {
-                        Id = (ulong)eventData.Id.GetHashCode(),
+                        // Id = (ulong)eventData.Id.GetHashCode(),//GetHashCode() is not a good persistent identifier for a vector database.
+                        Id = new PointId
+                        {
+                            Uuid = eventData.Id.ToString()
+                        },
                         Vectors = vectorResult // Plural property fixed
                     };
 
