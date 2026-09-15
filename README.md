@@ -9,37 +9,66 @@ This repository houses an advanced **Autonomous Gateway Service** seamlessly int
 The application utilizes a hybrid execution topology. It dynamically transitions between structured Vector Database queries (RAG pattern) and autonomous agent workflows (ReAct loops) based on real-time classification of user semantic intent.
 
 ```text
-                      [ USER PROMPT VIA NEXT.JS FRONTEND ]
-                                       │
-                                       ▼
-                            [ ASP.NET CORE GATEWAY ]
-                                       │
-         ┌─────────────────────────────┴─────────────────────────────┐
-         ▼                                                           ▼
-  Intent Contains:                                            Intent Contains:
- "Find" / "Search"                                          Operational Requests
-         │                                                           │
-         ▼ (RAG Path)                                                ▼ (Agentic Path)
-┌─────────────────┐                                         ┌──────────────────────────────────┐
-│  OpenAI Embed   │                                         │   ChatHistory State Container    │
-│  Model (1536d)  │                                         └─────────────────┬────────────────┘
-└────────┬────────┘                                                           │
-         │ (Vector float[])                                                   ▼
-         ▼                                                  ┌──────────────────────────────────┐
-┌─────────────────┐                                         │   Semantic Kernel Orchestration  │
-│Qdrant Vector DB │                                         │ with FunctionChoiceBehavior.Auto │
-└────────┬────────┘                                         └─────────────────┬────────────────┘
-         │ Cosine Search                                                      │
-         ▼                                                                    ▼
-┌─────────────────┐                                         ┌──────────────────────────────────┐
-│ Structured RAG  │                                         │     ECommerceMcpToolsPlugin      │
-│Product Payloads │                                         └────────┬────────────────┬────────┘
-└─────────────────┘                                                  │                │
-                                                                     ▼                ▼
-                                                            ┌────────────────┐┌────────────────┐
-                                                            │ Order Service  ││ Stock Service  │
-                                                            │(HTTP/gRPC API) ││(HTTP/gRPC API) │
-                                                            └────────────────┘└────────────────┘
+                      [ USER PROMPT ]
+                                │
+                                ▼
+                    [ NEXT.JS FRONTEND ]
+                                │
+                                ▼
+                  [ ASP.NET CORE API GATEWAY ]
+                                │
+                                ▼
+                         [ ChatService ]
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │    SEMANTIC KERNEL    │
+                    │   AI ORCHESTRATION    │
+                    └───────────┬───────────┘
+                                │
+                 ┌──────────────┴──────────────┐
+                 │                             │
+                 ▼                             ▼
+        ┌─────────────────┐          ┌─────────────────────┐
+        │      RAG        │          │  FUNCTION CALLING   │
+        │ Knowledge Path  │          │   Live Data Path    │
+        └────────┬────────┘          └──────────┬──────────┘
+                 │                              │
+                 ▼                              ▼
+        ┌─────────────────┐          ┌─────────────────────┐
+        │ OpenAI Embedding│          │ FunctionChoice      │
+        │ 1536 Dimensions │          │ Behavior.Auto()     │
+        └────────┬────────┘          └──────────┬──────────┘
+                 │                              │
+                 ▼                              ▼
+        ┌─────────────────┐          ┌─────────────────────┐
+        │ Qdrant Vector DB│          │ ECommerceToolsPlugin│
+        │                 │          │  [KernelFunction]   │
+        └────────┬────────┘          └──────────┬──────────┘
+                 │                              │
+                 │                              ├──────────────┐
+                 │                              │              │
+                 ▼                              ▼              ▼
+        ┌─────────────────┐             ┌───────────┐  ┌───────────┐
+        │ Relevant Product│             │  Order    │  │ Inventory │
+        │ Knowledge       │             │  Service  │  │  Service  │
+        └────────┬────────┘             └───────────┘  └───────────┘
+                 │                              │
+                 |                              |
+                 │                              │
+                 └──────────────┬───────────────┘
+                                │
+                                ▼
+                         ┌──────────────┐
+                         │    OpenAI    │
+                         │   GPT Model  │
+                         └──────┬───────┘
+                                │
+                                ▼
+                         [ FINAL RESPONSE ]
+                                │
+                                ▼
+                         [ NEXT.JS UI ]
 
 
 ```
