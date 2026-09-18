@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\ChatAssistantController.cs" />
+    <Compile Remove="Program1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.BedrockAgentRuntime" Version="4.0.102.5" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.101.6" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.101.3" />
     <PackageReference Include="Confluent.Kafka" Version="2.15.0" />
     <PackageReference Include="MediatR" Version="14.2.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.8.3" />

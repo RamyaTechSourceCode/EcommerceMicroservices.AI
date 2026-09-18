@@ -1,6 +1,5 @@
 ﻿
 using EcommerceMicroservices.Ai.Mcp;
-using EcommerceMicroservices.AI.Bedrock;
 using EcommerceMicroservices.AI.Dto;
 using EcommerceMicroservices.AI.Services;
 using MediatR;
@@ -23,6 +22,7 @@ public class ChatAssistantOpenAIController : ControllerBase
         ChatService chatService)
     {
         _chatService = chatService;
+ 
     }
 
     [HttpPost("chat")]
@@ -39,6 +39,8 @@ public class ChatAssistantOpenAIController : ControllerBase
             response
         });
     }
+
+    
 }
     //Kernel in case of multiple tools/plugins, we can intercept the intent triggers to decide between direct RAG search or Agentic tool execution
     /*[HttpPost("chat")]

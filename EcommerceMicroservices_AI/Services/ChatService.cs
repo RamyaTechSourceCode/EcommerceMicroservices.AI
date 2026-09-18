@@ -1,7 +1,5 @@
-﻿using EcommerceMicroservices.Ai.Mcp;
-using Microsoft.SemanticKernel;
+﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 namespace EcommerceMicroservices.AI.Services;
 
@@ -10,16 +8,9 @@ public class ChatService
     private readonly Kernel _kernel;
     private readonly IChatCompletionService _chatService;
 
-    public ChatService(
-        Kernel kernel,
-        ECommerceMcpToolsPlugin mcpPlugin)
+    public ChatService(Kernel kernel)
     {
         _kernel = kernel;
-
-        // Register ecommerce tools with Semantic Kernel
-        _kernel.Plugins.AddFromObject(
-            mcpPlugin,
-            "ECommerceTools");
 
         _chatService =
             _kernel.GetRequiredService<IChatCompletionService>();
@@ -77,18 +68,11 @@ public class ChatService
 
         chatHistory.AddUserMessage(userMessage);
 
-        var settings = new OpenAIPromptExecutionSettings
-        {
-            FunctionChoiceBehavior =
-                FunctionChoiceBehavior.Auto()
-        };
-
         var response =
             await _chatService.GetChatMessageContentAsync(
                 chatHistory,
-                settings,
-                _kernel,
-                cancellationToken);
+                kernel: _kernel,
+                cancellationToken: cancellationToken);
 
         return response.Content;
     }
