@@ -1,201 +1,402 @@
-# E-COMMERCE MICROSERVICES AI ASSISTANT
+# 🛒 EcommerceMicroservices.AI
 
-This repository houses an advanced **Autonomous Gateway Service** seamlessly integrated into an e-commerce microservices ecosystem. Leveraging modern Artificial Intelligence methodologies, the service functions as an intelligent routing and orchestration hub right behind the platform's API gateway. It dynamically manages Retrieval-Augmented Generation (RAG) and Agentic tool workflows using the Model Context Protocol (MCP). Built entirely on the latest .NET framework, it bridges natural language interactions with backend systems to perform autonomous vector searches, live transaction tracing, and operational inventory modifications within a single conversation turn.
+> **AI-Powered E-Commerce Microservices Platform using ASP.NET Core, Next.js, Semantic Kernel, AWS Bedrock, RAG, Qdrant, Kafka and AI Function Calling**
+
+An enterprise-style e-commerce platform enhanced with **Generative AI and Agentic AI capabilities**.
+
+The project combines a traditional **.NET microservices architecture** with an AI orchestration layer built using **Microsoft Semantic Kernel** and **Amazon Bedrock**.
+
+The AI assistant can understand natural-language requests and decide when it should:
+
+* Search product information
+* Retrieve product recommendations
+* Check inventory
+* Check order status
+* Retrieve order-related information
+* Invoke backend microservice functions
+* Use semantic/vector search for product discovery
+* Generate a natural-language response using an LLM
+
+The architecture is designed to demonstrate how **AI can be introduced into an existing enterprise microservices platform without tightly coupling the AI layer to individual business services**.
 
 ---
 
-## SYSTEM ARCHITECTURE OVERVIEW
+## 🎯 Architecture 
 
-The application utilizes a hybrid execution topology. It dynamically transitions between structured Vector Database queries (RAG pattern) and autonomous agent workflows (ReAct loops) based on real-time classification of user semantic intent.
+The project demonstrates:
+
+* **Generative AI integration**
+* **Agentic AI / Function Calling**
+* **Semantic Kernel orchestration**
+* **AWS Bedrock integration**
+* **RAG and Vector Search**
+* **Event-driven architecture**
+* **AI integration with microservices**
+* **Cloud-ready enterprise architecture**
+
+---
+
+# 📌 Project Overview
+
+The platform follows this high-level architecture:
 
 ```text
-                      [ USER PROMPT ]
-                                │
-                                ▼
-                    [ NEXT.JS FRONTEND ]
-                                │
-                                ▼
-                  [ ASP.NET CORE API GATEWAY ]
-                                │
-                                ▼
-                         [ ChatService ]
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │    SEMANTIC KERNEL    │
-                    │   AI ORCHESTRATION    │
-                    └───────────┬───────────┘
-                                │
-                 ┌──────────────┴──────────────┐
-                 │                             │
-                 ▼                             ▼
-        ┌─────────────────┐          ┌─────────────────────┐
-        │      RAG        │          │  FUNCTION CALLING   │
-        │ Knowledge Path  │          │   Live Data Path    │
-        └────────┬────────┘          └──────────┬──────────┘
-                 │                              │
-                 ▼                              ▼
-        ┌─────────────────┐          ┌─────────────────────┐
-        │ OpenAI Embedding│          │ FunctionChoice      │
-        │ 1536 Dimensions │          │ Behavior.Auto()     │
-        └────────┬────────┘          └──────────┬──────────┘
-                 │                              │
-                 ▼                              ▼
-        ┌─────────────────┐          ┌─────────────────────┐
-        │ Qdrant Vector DB│          │ ECommerceToolsPlugin│
-        │                 │          │  [KernelFunction]   │
-        └────────┬────────┘          └──────────┬──────────┘
-                 │                              │
-                 │                              ├──────────────┐
-                 │                              │              │
-                 ▼                              ▼              ▼
-        ┌─────────────────┐             ┌───────────┐  ┌───────────┐
-        │ Relevant Product│             │  Order    │  │ Inventory │
-        │ Knowledge       │             │  Service  │  │  Service  │
-        └────────┬────────┘             └───────────┘  └───────────┘
-                 │                              │
-                 |                              |
-                 │                              │
-                 └──────────────┬───────────────┘
-                                │
-                                ▼
-                         ┌──────────────┐
-                         │    OpenAI    │
-                         │   GPT Model  │
-                         └──────┬───────┘
-                                │
-                                ▼
-                         [ FINAL RESPONSE ]
-                                │
-                                ▼
-                         [ NEXT.JS UI ]
-
-
+                         ┌──────────────────────────────┐
+                         │        NEXT.JS FRONTEND      │
+                         │                              │
+                         │   AI Chat / E-Commerce UI    │
+                         └──────────────┬───────────────┘
+                                        │
+                                        │ HTTP
+                                        ▼
+                         ┌──────────────────────────────┐
+                         │     ASP.NET CORE GATEWAY     │
+                         │                              │
+                         │ Authentication / Routing     │
+                         │ AI Chat API                  │
+                         └──────────────┬───────────────┘
+                                        │
+                                        ▼
+                         ┌──────────────────────────────┐
+                         │    AI ORCHESTRATION LAYER    │
+                         │                              │
+                         │     Semantic Kernel          │
+                         │                              │
+                         │ FunctionChoiceBehavior.Auto  │
+                         └──────────────┬───────────────┘
+                                        │
+                     ┌──────────────────┴──────────────────┐
+                     │                                     │
+                     ▼                                     ▼
+          ┌─────────────────────┐              ┌──────────────────────┐
+          │    AWS BEDROCK      │              │      RAG LAYER       │
+          │                     │              │                      │
+          │ Amazon Nova Lite    │              │ Embeddings           │
+          │ Converse API        │              │ Qdrant               │
+          │ Tool Use            │              │ Vector Search        │
+          └──────────┬──────────┘              └──────────┬───────────┘
+                     │                                    │
+                     │                                    │
+                     ▼                                    ▼
+          ┌─────────────────────┐              ┌──────────────────────┐
+          │ Semantic Kernel     │              │ Product Knowledge    │
+          │ Plugins / Functions │              │ / Product Vectors    │
+          └──────────┬──────────┘              └──────────────────────┘
+                     │
+          ┌──────────┼───────────────┐
+          │          │               │
+          ▼          ▼               ▼
+     Product      Inventory        Order
+     Service      Service          Service
+          │          │               │
+          └──────────┼───────────────┘
+                     │
+                     ▼
+              Existing E-Commerce
+              Microservices
 ```
 
-## CORE TECHNICAL STACK
+---
 
-* **FRONTEND PLATFORM:** Next.js 14+ (App Router Topology), React 18, Tailwind CSS UI Framework.
-* **BACKEND ARCHITECTURE:** .NET 8 ASP.NET Core Minimal APIs / Web APIs, MediatR (CQRS Pattern),Event driven architecture
-* **AI INTERACTION ENGINES:** Microsoft Semantic Kernel, `Microsoft.Extensions.AI` Abstractions.
-* **FOUNDATIONAL MODEL SERVICES:** OpenAI GPT-4o (Reasoning & Complete Session Logic), OpenAI `text-embedding-3-small` (1536-Dimensional Vector Geometries).
-* **VECTOR STORAGE ENVIRONMENT:** Qdrant DB Container Cluster running via native Linux gRPC subchannels.
-* **SECURITY LAYERS:** Azure Entra ID Token Validation, Secure BFF Cross-Origin Resource Policies.
+# 🎯 Project Objective
+
+The objective of this project is to demonstrate how an existing **distributed e-commerce system can be enhanced with Generative AI**.
+
+Instead of implementing an AI chatbot as a standalone application, the AI layer is integrated with real business capabilities.
+
+For example, a user can ask:
+
+```text
+Is product 5772C2A6-CF1F-42E0-9218-40E264EF126A in stock?
+```
+
+The AI model does not need to know the inventory directly.
+
+Instead:
+
+```text
+User
+ ↓
+Next.js
+ ↓
+ASP.NET Core
+ ↓
+Semantic Kernel
+ ↓
+AWS Bedrock
+ ↓
+Function Selection
+ ↓
+Inventory Function
+ ↓
+Inventory Microservice
+ ↓
+Function Result
+ ↓
+AWS Bedrock
+ ↓
+Natural Language Response
+```
+
+This demonstrates **LLM-powered orchestration over real enterprise APIs**.
 
 ---
 
-## DESIGN PATTERNS & PRINCIPLES
+# 🚀 Key Features
 
-* **RETRIEVAL-AUGMENTED GENERATION (RAG):** User searches are intercept-mapped, transformed into dense embeddings via `IEmbeddingGenerator`, and processed using Cosine similarity scoring arrays to extract contextual catalog data directly from Qdrant.
-* **MODEL CONTEXT PROTOCOL & PLUGINS:** Methods are decorated with `[KernelFunction]` and semantic argument definitions. This enables the LLM to inspect system manifests and execute low-level database lookups dynamically.
-* **STATELESS CHATHISTORY CONTEXT:** System and session payloads are managed via sequential context layers, tracking state profiles across execution loops.
-* **FAIL-FAST DATA INITIALIZATION:** Database parameters and collection geometries are automatically created via `VectorParams` configuration steps on backend process initialization.
+## 1. AI-Powered E-Commerce Assistant
+
+Users interact with the platform using natural language.
+
+Examples:
+
+```text
+Show me information about product ABC.
+
+Is product ABC available?
+
+How many units are available?
+
+Where is my order?
+
+What is the status of order 123?
+
+Find products similar to this dress.
+
+Do you have this product in stock?
+```
+
+The AI determines how the request should be handled.
 
 ---
 
-## REGISTRATION & INTEGRATION CODES
+# 2. Semantic Kernel
 
-### PROGRAM.CS APPLICATION DEPENDENCY SETUP
-```csharp
-#pragma warning disable SKEXP0010 
+**Microsoft Semantic Kernel** is used as the AI orchestration layer.
 
-var builder = WebApplication.CreateBuilder(args);
+Responsibilities include:
 
-// Configure Secure Core Tokens
-var openAiKey = builder.Configuration["OpenAI:ApiKey"];
+* AI service abstraction
+* Chat history
+* Kernel management
+* Plugin registration
+* Function calling
+* Function invocation
+* AI orchestration
+* Tool/function metadata
+* RAG integration
 
-// Register Semantic Kernel & AI Service Contracts
-var kernelBuilder = Kernel.CreateBuilder();
-kernelBuilder.AddOpenAIEmbeddingGenerator("text-embedding-3-small", openAiKey);
-kernelBuilder.AddOpenAIChatCompletion("gpt-4o", openAiKey);
+The project uses:
 
-Kernel kernel = kernelBuilder.Build();
-builder.Services.AddSingleton(kernel);
+```text
+Semantic Kernel
+        │
+        ├── Chat Completion Service
+        │
+        ├── Kernel
+        │
+        ├── Plugins
+        │
+        ├── Kernel Functions
+        │
+        └── FunctionChoiceBehavior.Auto()
+```
 
-// Register High Performance Qdrant Database Subchannel Engine
-builder.Services.AddSingleton(new QdrantClient("localhost", 6334));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+Semantic Kernel's function-calling mechanism serializes available functions and their parameters, sends them to the model, processes the model's tool/function request, invokes the corresponding function, and sends the result back into the conversation.
 
-var app = builder.Build();
+This creates an AI orchestration loop rather than simply generating text.
 
-// Ensure Automated Collection Initialization Prior to App Runtime Boot
-using (var scope = app.Services.CreateScope())
+---
+
+# 3. AWS Bedrock Integration
+
+The project integrates **Amazon Bedrock** as the LLM provider.
+
+Current target configuration:
+
+```text
+AWS
+ └── Amazon Bedrock
+      └── Amazon Nova Lite
+```
+
+The project uses a custom Semantic Kernel implementation:
+
+```text
+BedrockChatCompletionService
+            │
+            implements
+            ▼
+IChatCompletionService
+            │
+            ▼
+AWS Bedrock Runtime
+```
+
+This allows the rest of the application to interact with Bedrock through the Semantic Kernel abstraction.
+
+The application therefore avoids coupling the controller directly to the AWS SDK.
+
+Architecture:
+
+```text
+Controller
+    │
+    ▼
+Semantic Kernel
+    │
+    ▼
+IChatCompletionService
+    │
+    ▼
+BedrockChatCompletionService
+    │
+    ▼
+IAmazonBedrockRuntime
+    │
+    ▼
+Amazon Bedrock
+    │
+    ▼
+Amazon Nova Lite
+```
+
+Amazon Bedrock is a managed service for accessing foundation models from Amazon and other providers.
+
+---
+---
+
+# 4. Amazon Nova Lite
+
+The current Bedrock implementation is designed around Amazon Nova Lite.
+
+AWS inference profiles can be used as the model identifier for supported Bedrock invocation APIs. This is particularly useful when a model is accessed through a cross-Region inference profile rather than directly through a foundation-model identifier.
+
+Current project configuration follows the APAC inference-profile approach.
+
+Example:
+```text
 {
-    var qdrant = scope.ServiceProvider.GetRequiredService<QdrantClient>();
-    var collections = await qdrant.ListCollectionsAsync();
-    if (!collections.Contains("products"))
-    {
-        await qdrant.CreateCollectionAsync("products", new VectorParams { Size = 1536, Distance = Distance.Cosine });
-    }
-}
-
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-app.Run();
-```
-
----
-
-## REPOSITORY SETUP & RUNTIME INSTRUCTIONS
-
-### 1. RUN OR START VIRTUAL DATABASES VIA UBUNTU TERMINAL
-Pull down and spin up persistent storage containers utilizing the GitHub Container Registry mirrors:
-```bash
-sudo docker run -d \
-  -p 6333:6333 \
-  -p 6334:6334 \
-  -v qdrant_storage:/qdrant/storage \
-  ghcr.io/qdrant/qdrant:latest
-```
-
-### 2. CONFIGURING DEVELOPMENT CONFIGURATIONS
-Create an `appsettings.Development.json` configuration inside the API project directory root layer:
-```json
-{
-  "OpenAI": {
-    "ApiKey": "sk-proj-YOUR_ACTUAL_DEVELOPER_KEY_HERE"
+  "AWS": {
+    "Region": ""
+  },
+  "Bedrock": {
+    "ModelId": ""
   }
 }
 ```
-
-### 3. LAUNCHING BACKEND MICROSERVICES
-```bash
-cd EcommerceMicroservices_AI
-dotnet restore
-dotnet run
-```
-
-### 4. LAUNCHING CLIENT REACT INTERFACES
-```bash
-cd EcommerceBFF
-npm install
-npm run dev
-```
+Do not commit AWS access keys, secret keys or other credentials to GitHub.
 
 ---
 
-## POSTMAN INTEGRATION TESTING ENDPOINTS
+# 5. Custom IChatCompletionService
 
-### COMPLEX CONVERSATIONAL CHAT ENGINE (AGENT TRACING / INVENTORY ADJUSTMENT)
-* **METHOD:** `POST`
-* **ENDPOINT:** `http://localhost:3000/api/chat`
-* **HEADERS:** `Content-Type: application/json`
-* **SAMPLE TEXT PAYLOAD BODY:**
-```json
-{
-  "userMessage": "Please check the ordered quantity for order 45f8e22b-8a21-4f19-b2c7-742a84d43611."
-}
+One of the important architectural features of this project is the custom Bedrock adapter.
+
+BedrockChatCompletionService
+        :
+        : implements
+        ▼
+IChatCompletionService
+
+This means Semantic Kernel does not need to know that the underlying provider is AWS Bedrock.
+
+The application can use the standard Semantic Kernel abstraction:
+
+IChatCompletionService
+
+while the implementation internally communicates with:
+
+IAmazonBedrockRuntime
+
+This provides a clean separation between:
+```text
+AI Orchestration
+       │
+       ▼
+AI Provider
+```
+rather than:
+```text
+Controller
+       │
+       ▼
+AWS SDK
+```
+---
+
+# 6. AI Function Calling
+
+The project uses Semantic Kernel plugins to expose business capabilities to the AI model.
+
+Conceptually:
+
+                    AI MODEL
+                       │
+              "I need inventory"
+                       │
+                       ▼
+             Function Selection
+                       │
+                       ▼
+             Kernel Function
+                       │
+                       ▼
+              Inventory Service
+
+The application enables automatic function selection using:
+
+FunctionChoiceBehavior.Auto()
+
+Semantic Kernel documents Auto() as the behavior that allows the model to decide whether to call available functions and which functions to call.
+
+---
+
+# 7. E-Commerce AI Plugin
+
+The project contains an e-commerce tool/plugin layer.
+
+Conceptually:
+```text
+ECommerceMcpToolsPlugin
+          │
+          ├── Product Functions
+          │
+          ├── Inventory Functions
+          │
+          └── Order Functions
+```
+---
+
+# 8. RAG — Retrieval Augmented Generation
+
+The project also contains a RAG architecture for product knowledge.
+
+The RAG flow is:
+```text
+User Query
+     │
+     ▼
+Embedding Generation
+     │
+     ▼
+Vector Representation
+     │
+     ▼
+Qdrant
+     │
+     ▼
+Cosine / Vector Similarity Search
+     │
+     ▼
+Relevant Product Information
+     │
+     ▼
+LLM
+     │
+     ▼
+Grounded Response
 ```
 
-### CATALOG SEMANTIC DISCOVERY INTERCEPT (RAG SEARCH METHOD)
-* **METHOD:** `POST`
-* **ENDPOINT:** `http://localhost:3000/api/chat`
-* **HEADERS:** `Content-Type: application/json`
-* **SAMPLE TEXT PAYLOAD BODY:**
-```json
-{
-  "userMessage": "Find me some ergonomic mechanical keyboards that are quiet for shared office environments."
-}
-```
+RAG is primarily used for product discovery and semantic search scenarios.
+These functions act as the bridge between the AI model and the existing microservices.
